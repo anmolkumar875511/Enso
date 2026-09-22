@@ -104,16 +104,17 @@ The app should now be running at `http://localhost:5173` (frontend) with the API
 ```
 enso/
 ├── client/          # React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── App.jsx
+│  └── src/
+│       ├── components/
+│       ├── pages/
+│       └── App.jsx
 ├── server/           # Express backend
-│   ├── models/
-│   ├── routes/
-│   ├── controllers/
-│   ├── middleware/
-│   └── index.js
+│  └── src/
+│       ├── models/
+│       ├── routes/
+│       ├── controllers/
+│       ├── middleware/
+│       └── index.js
 └── README.md
 ```
 
