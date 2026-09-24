@@ -16,7 +16,8 @@ const userSchema = new mongoose.Schema({
     },
     passwordHash: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     authProvider: {
         type: String,
@@ -33,15 +34,10 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function (next) {
     if(!this.isModified('passwordHash')) {
-        return next();
+        return;
     }
-    try {
-        const salt = await bcrypt.genSalt(11);
-        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
+    const salt = await bcrypt.genSalt(11);
+    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
 });
 
 userSchema.methods.comparePassword = function(plainPassword) {
