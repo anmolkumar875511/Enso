@@ -4,7 +4,6 @@ import asyncHandler from '../utils/asyncHandler.js';
 
 const verifyJWT = asyncHandler(async(req, res, next) => {
     const authHeader = req.headers.authorization;
-    console.log(authHeader);
 
     if(!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new ApiError(401, 'No token provided, access denied');

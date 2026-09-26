@@ -54,6 +54,6 @@ export const getUser = async(userId) => {
 
     return {
         'name': user.name,
-        'emai': user.email
+        'email': user.email
     };
 };
