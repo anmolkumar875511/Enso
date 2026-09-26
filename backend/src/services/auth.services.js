@@ -2,16 +2,6 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 
-const generateAuthResponse = (user) => {
-    const token = jwt.sign(
-        {userId: user._id},
-        process.env.JWT_SECRET,
-        {expiresIn: process.env.EXPIRES_IN}
-    );
-
-    return ({'token': token, 'user': user});
-}
-
 export const registerUser = async({name, email, password}) => {
     console.log(name, email, password);
     if(!(name && email && password)) {
@@ -24,7 +14,13 @@ export const registerUser = async({name, email, password}) => {
     }
 
     const user = await User.create({name: name, email: email, passwordHash: password});
-    return generateAuthResponse(user);
+
+    const token = jwt.sign(
+        {userId: user._id},
+        process.env.JWT_SECRET,
+        {expiresIn: process.env.EXPIRES_IN}
+    );
+    return token;
 };
 
 export const loginUser = async({email, password}) => {
@@ -39,5 +35,25 @@ export const loginUser = async({email, password}) => {
         throw new ApiError(401, 'Invalid password, Please use valid password');
     }
 
-    return generateAuthResponse(user);
+    const token = jwt.sign(
+        {userId: user._id},
+        process.env.JWT_SECRET,
+        {expiresIn: process.env.EXPIRES_IN}
+    );
+
+    return token;
+};
+
+
+export const getUser = async(userId) => {
+    const user = await User.findById(userId);
+
+    if(!user) {
+        throw new ApiError(404, 'User not found');
+    }
+
+    return {
+        'name': user.name,
+        'emai': user.email
+    };
 };
