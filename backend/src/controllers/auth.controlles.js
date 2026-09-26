@@ -1,4 +1,4 @@
-import { registerUser, loginUser } from '../services/auth.services.js';
+import { registerUser, loginUser, getUser } from '../services/auth.services.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -20,6 +20,17 @@ export const login = asyncHandler(async(req, res) => {
             200,
             result,
             'Login successfully'
+        )
+    );
+});
+
+export const getMe = asyncHandler(async(req, res) => {
+    const result = await getUser(req.user.userId);
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            result,
+            'User fetched successfully'
         )
     );
 });
