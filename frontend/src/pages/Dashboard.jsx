@@ -8,9 +8,7 @@ function Dashboard() {
     useEffect(() => {
         const fetchUser = async() => {
             try {
-                const token = localStorage.getItem('token');
-                const header = {headers: {Authorization: `Bearer ${token}`}};
-                const res = await api.get('/auth/me', header);
+                const res = await api.get('/auth/me');
                 setUser(res.data.data)
             } catch (error) {
                 setError(error.response?.data?.message || 'Unable to fetch user details');
