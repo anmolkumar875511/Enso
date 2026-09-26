@@ -11,7 +11,7 @@ function Dashboard() {
                 const token = localStorage.getItem('token');
                 const header = {headers: {Authorization: `Bearer ${token}`}};
                 const res = await api.get('/auth/me', header);
-                console.log(res)
+                setUser(res.data.data)
             } catch (error) {
                 setError(error.response?.data?.message || 'Unable to fetch user details');
             }
@@ -22,14 +22,14 @@ function Dashboard() {
     if(error) {
         return <p>{error}</p>
     }
-    if(!res.data.data) {
+    if(!user) {
         return <p>Loading...</p>
     }
 
     return (
         <>
-            <h2>{res.data.data.name}</h2>
-            <h2>{res.data.data.email}</h2>
+            <h2>{user.name}</h2>
+            <h2>{user.email}</h2>
         </>
     );
 }
