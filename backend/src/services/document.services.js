@@ -1,7 +1,7 @@
 import Document from '../models/document.model.js';
 import ApiError from '../utils/ApiError.js';
 
-const createDocument = async (userId, { title, category, fileUrl, notes }) => {
+export const createDocument = async (userId, { title, category, fileUrl, notes }) => {
     if (!userId) {
         throw new ApiError(401, 'Unauthorized');
     }
@@ -21,12 +21,12 @@ const createDocument = async (userId, { title, category, fileUrl, notes }) => {
     return document;
 };
 
-const getDocuments = async (userId) => {
+export const getDocuments = async (userId) => {
     const documents = await Document.find({ owner: userId });
     return documents;
 };
 
-const deleteDocument = async (documentId, userId) => {
+export const deleteDocument = async (documentId, userId) => {
     if (!documentId) {
         throw new ApiError(400, 'Missing document id');
     }
@@ -37,5 +37,3 @@ const deleteDocument = async (documentId, userId) => {
         throw new ApiError(404, 'Document not found');
     }
 };
-
-export { createDocument, getDocuments, deleteDocument };
