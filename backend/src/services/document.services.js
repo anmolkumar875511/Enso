@@ -1,7 +1,7 @@
 import Document from '../models/document.model.js';
 import ApiError from '../utils/ApiError.js';
 
-export const createDocument = async (userId, { title, category, fileUrl, notes }) => {
+export const createDocument = async (userId, { title, category, notes, fileUrl }) => {
     if (!userId) {
         throw new ApiError(401, 'Unauthorized');
     }
