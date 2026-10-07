@@ -1,9 +1,17 @@
 import { createDocument, getDocuments, deleteDocument } from '../services/document.services.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
+import uploadToCloudinary from '../utils/uploadToCloudinary.js'
 
 export const create = asyncHandler(async (req, res) => {
-    const document = await createDocument(req.user.userId, req.body);
+    if (!req.file) {
+        throw new ApiError(400, 'No file to upload');
+    }
+
+    const fileUrl = await uploadToCloudinary(req.file.buffer);
+
+    const document = await createDocument(req.user.userId, {...req.body, fileUrl});
     res.status(201).json(
         new ApiResponse(
             201,
