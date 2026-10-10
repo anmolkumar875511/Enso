@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import api from '../api/axios.js';
-
-const CATEGORIES = ['id', 'insurance', 'medical', 'property', 'financial', 'will', 'others'];
+import { CATEGORIES } from '../constants/categories.js';
 
 function uploadForm({ onUploaded }) {
     const [title, setTitle] = useState('');
@@ -21,7 +20,9 @@ function uploadForm({ onUploaded }) {
         }
 
         const formData = new FormData();
-        formData.append('title', title);
+        if(title.trim()) {
+            formData.append('title', title.trim());
+        }
         formData.append('category', category);
         formData.append('notes', notes);
         formData.append('file', file);
@@ -38,7 +39,7 @@ function uploadForm({ onUploaded }) {
 
             onUploaded();
         } catch (error) {
-            setError(error.response?.data?.mesage || 'Upload failed');
+            setError(error.response?.data?.message || 'Upload failed');
         } finally {
             setLoading(false);
         }
@@ -66,7 +67,7 @@ function uploadForm({ onUploaded }) {
                     value = {notes}
                     onChange = {(e) => setNotes(e.target.value)}
                 />
-                <intput
+                <input
                     type = 'file'
                     accept = '.png, .jpeg, .jpg, .webp, .pdf'
                     onChange = {(e) => setFile(e.target.files[0])}
