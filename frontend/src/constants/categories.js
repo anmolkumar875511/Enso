@@ -1,0 +1,1 @@
+export const CATEGORIES = ['id', 'insurance', 'medical', 'property', 'financial', 'will', 'others'];
