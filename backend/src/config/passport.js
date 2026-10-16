@@ -8,16 +8,16 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackUrl: process.env.GOOGLE_CALLBACK_URL
+            callbackURL: process.env.GOOGLE_CALLBACK_URL
 
         },
-        async (_, _, profile, done) => {
+        async (accessToken, refreshToken, profile, done) => {
             try {
                 const user = await findOrCreateGoogleUser({
                     googleId: profile.id,
                     email: profile.emails?.[0]?.value,
                     name: profile.displayName,
-                    emailVerifiend: profile._json.email_verified
+                    emailVerified: profile._json.email_verified
                 });
                 done(null, user);
             } catch (error) {
