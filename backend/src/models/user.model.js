@@ -16,7 +16,9 @@ const userSchema = new mongoose.Schema({
     },
     passwordHash: {
         type: String,
-        required: true,
+        required: function() {
+            return this.authProvider === 'local';
+        },
         select: false
     },
     authProvider: {
