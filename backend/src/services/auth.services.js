@@ -2,6 +2,14 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 
+export const signToken = (userID) => {
+    return jwt.sign(
+        {userID},
+        process.env.JWT_SECRET,
+        {expiresIn: process.env.EXPIRES_IN}
+    );
+};
+
 export const registerUser = async({name, email, password}) => {
     console.log(name, email, password);
     if(!(name && email && password)) {
@@ -15,12 +23,7 @@ export const registerUser = async({name, email, password}) => {
 
     const user = await User.create({name: name, email: email, passwordHash: password});
 
-    const token = jwt.sign(
-        {userId: user._id},
-        process.env.JWT_SECRET,
-        {expiresIn: process.env.EXPIRES_IN}
-    );
-    return token;
+    return signToken(user._id);
 };
 
 export const loginUser = async({email, password}) => {
@@ -30,18 +33,41 @@ export const loginUser = async({email, password}) => {
         throw new ApiError(401, 'Invalid email, Please use valid email')
     }
 
+    if(!user.passwordHash && user.googleId && user.authProvider === 'google') {
+        throw new ApiError(400, 'You are registered with Google Id. Please use "Continue with Google"');
+    }
+
     const isMatching = await user.comparePassword(password);
     if(!isMatching) {
         throw new ApiError(401, 'Invalid password, Please use valid password');
     }
 
-    const token = jwt.sign(
-        {userId: user._id},
-        process.env.JWT_SECRET,
-        {expiresIn: process.env.EXPIRES_IN}
-    );
+    return signToken(user._id);
+};
 
-    return token;
+export const findOrCreateGoogleUser = async({googleId, email, name, emailVerified}) => {
+    if(!googleId || !email || !emailVerified) {
+        throw new ApiError(400, 'Your GoogleId is not verified');
+    }
+
+    const googleUser = await User.findOne({googleId});
+    if(googleUser) {
+        return googleUser;
+    }
+
+    const normalizedEmail = email.toLowerCase();
+
+    const sameEmailUser = await User.findOne({normalizedEmail});
+    if(sameEmailUser) {
+        throw new ApiError(409, 'An account with this email already exist');
+    }
+
+    return User.create({
+        name,
+        email: normalizedEmail,
+        googleId,
+        authProvider: 'google'
+    });
 };
 
 
