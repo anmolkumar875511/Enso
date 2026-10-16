@@ -34,7 +34,7 @@ function Login() {
                 <button type = 'submit'>Login</button>
                 {error && <p>{error}</p>}
             </form>
-            <a href = 'http://localhost:5000/api/vi/auth/goggle'>Continue with Google</a>
+            <a href = 'http://localhost:5000/api/v1/auth/google'>Continue with Google</a>
         </>
     );
 }
