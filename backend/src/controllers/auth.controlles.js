@@ -28,7 +28,7 @@ export const login = asyncHandler(async(req, res) => {
 export const googleCallback = (req, res, next) => {
     passport.authenticate('google', {session: false}, (err, user, info) => {
         if(err || !user) {
-            const message = encodeUriComponent(info?.message || 'Google sign-in failed');
+            const message = encodeURIComponent(info?.message || 'Google sign-in failed');
             return res.redirect(`${process.env.CLIENT_URL}/login?error=${message}`);
         }
 
