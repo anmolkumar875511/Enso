@@ -1,4 +1,5 @@
-import { registerUser, loginUser, getUser } from '../services/auth.services.js';
+import passport from 'passport';
+import { registerUser, loginUser, getUser, signToken } from '../services/auth.services.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -23,6 +24,18 @@ export const login = asyncHandler(async(req, res) => {
         )
     );
 });
+
+export const googleCallback = (req, res, next) => {
+    passport.authenticate('google', {session: false}, (err, user, info) => {
+        if(err || !user) {
+            const message = encodeUriComponent(info?.message || 'Google sign-in failed');
+            return res.redirect(`${process.env.CLIENT_URL}/login?error=${message}`);
+        }
+
+        const token = signToken(user._id);
+        return res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${token}`);
+    })(req, res, next);
+};
 
 export const getMe = asyncHandler(async(req, res) => {
     const result = await getUser(req.user.userId);
