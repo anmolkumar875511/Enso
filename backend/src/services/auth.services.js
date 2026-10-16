@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 
-export const signToken = (userID) => {
+export const signToken = (userId) => {
     return jwt.sign(
-        {userID},
+        {userId},
         process.env.JWT_SECRET,
         {expiresIn: process.env.EXPIRES_IN}
     );
@@ -57,7 +57,7 @@ export const findOrCreateGoogleUser = async({googleId, email, name, emailVerifie
 
     const normalizedEmail = email.toLowerCase();
 
-    const sameEmailUser = await User.findOne({normalizedEmail});
+    const sameEmailUser = await User.findOne({email: normalizedEmail});
     if(sameEmailUser) {
         throw new ApiError(409, 'An account with this email already exist');
     }
