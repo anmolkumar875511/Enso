@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios.js';
 
 function Login() {
     const [formData, setFormData] = useState({email: '', password: ''});
-    const [error, setError] = useState('');
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [error, setError] = useState(searchParams.get('error') || '');
 
     const handleChange = (e) => {
         setFormData({...formData, [e.target.name]: e.target.value});
@@ -33,6 +34,7 @@ function Login() {
                 <button type = 'submit'>Login</button>
                 {error && <p>{error}</p>}
             </form>
+            <a href = 'http://localhost:5000/api/vi/auth/goggle'>Continue with Google</a>
         </>
     );
 }
