@@ -29,6 +29,29 @@ const userSchema = new mongoose.Schema({
     googleId: {
         type:String,
         default: null
+    },
+    vault: {
+        salt: {
+            type: String,
+            select: false
+        },
+        wrappedDEK: {
+            type: String,
+            select: false
+        },
+        DEKiv: {
+            type: String,
+            select: false
+        },
+        DEKAuthtag: {
+            type: String,
+            select: false
+        },
+        isSetup: {
+            type: Boolean,
+            default:false,
+            select: false
+        }
     }
 }, {
         timestamps: true
