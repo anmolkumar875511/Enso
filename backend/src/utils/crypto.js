@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { promisify } from 'util';
+import ApiError from './ApiError.js';
 
 const scrypt = promisify(crypto.scrypt);
 
@@ -61,6 +62,6 @@ export const unwrapKey = ({wrappedDEK, DEKiv, DEKAuthTag}, KEK) => {
             KEK
         );
     } catch (error) {
-        throw new Error("Invalid vault password");
+        throw new ApiError(403, 'Invalid vault password');
     }
 }
