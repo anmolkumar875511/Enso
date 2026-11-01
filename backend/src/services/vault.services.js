@@ -1,5 +1,5 @@
 import { generateSalt, deriveKEK, generateDEK, wrapKey, unwrapKey } from '../utils/crypto.js';
-import { setDEK, clearDEK } from '../utils/valutSession.js';
+import { setDEK, clearDEK } from '../utils/vaultSession.js';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 
@@ -43,7 +43,7 @@ export const unlockVault = async(userId, vaultPassword) => {
         throw new ApiError(403, 'Vault is not setup');
     }
 
-    const KEK = deriveKEK(vaultPassword, user.vault.salt);
+    const KEK = await deriveKEK(vaultPassword, user.vault.salt);
     const DEK = unwrapKey(user.vault, KEK);
 
     KEK.fill(0);

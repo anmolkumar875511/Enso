@@ -30,7 +30,7 @@ export const clearDEK = (userId) => {
 
 setInterval(() => {
     for(const [id, s] of sessions) {
-        if(Date.now() > s.expriesAt) {
+        if(Date.now() > s.expiresAt) {
             s.DEK.fill(0);
             sessions.delete(id);
         }

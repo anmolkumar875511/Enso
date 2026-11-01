@@ -6,7 +6,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 export const setup = asyncHandler(async (req, res) => {
     try {
         const vaultPassword = req.body.password;
-        const userId = req.body.userId;
+        const userId = req.user.userId;
         if(!userId) {
             throw new ApiError(400, 'Unauthenticated user cannot setup the vault');
         }
@@ -23,7 +23,7 @@ export const setup = asyncHandler(async (req, res) => {
 export const unlock = asyncHandler(async(req, res) => {
     try {
         const vaultPassword = req.body.password;
-        const userId = req.body.userId;
+        const userId = req.user.userId;
         if(!userId) {
             throw new ApiError(400, 'Unauthenticated user cannot unlock the vault');
         }
@@ -39,7 +39,7 @@ export const unlock = asyncHandler(async(req, res) => {
 
 export const lock = asyncHandler(async(req, res) => {
     try {
-        const userId = req.body.userId;
+        const userId = req.user.userId;
         if(!userId) {
             throw new ApiError(400, 'Unauthenticated user cannot lock the vault');
         }

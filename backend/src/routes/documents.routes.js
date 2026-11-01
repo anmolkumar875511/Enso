@@ -6,8 +6,8 @@ import requireUnlocked from '../middlewares/requireUnlocked.js';
 
 const router = express.Router();
 
-router.post('/create', requireUnlocked, upload.single('file'), verifyJWT, create);
-router.get('/get', verifyJWT, get);
-router.delete('/del', verifyJWT, del);
+router.post('/create', verifyJWT, requireUnlocked, upload.single('file'), create);
+router.get('/get', verifyJWT, requireUnlocked, get);
+router.delete('/del', verifyJWT, requireUnlocked, del);
 
 export default router;
