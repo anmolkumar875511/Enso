@@ -11,7 +11,6 @@ export const signToken = (userId) => {
 };
 
 export const registerUser = async({name, email, password}) => {
-    console.log(name, email, password);
     if(!(name && email && password)) {
         throw new ApiError(400, 'Name, Email and Password all are required to register');
     }
