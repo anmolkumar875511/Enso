@@ -3,19 +3,30 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import uploadToCloudinary from '../utils/uploadToCloudinary.js'
+import { encryptBuffer } from '../utils/crypto.js';
 
 export const create = asyncHandler(async (req, res) => {
     if (!req.file) {
         throw new ApiError(400, 'No file to upload');
     }
 
-    const fileUrl = await uploadToCloudinary(req.file.buffer);
+       const { originalname: originalName, mimetype: mimeType } = req.file;
 
-    const document = await createDocument(req.user.userId, {...req.body, fileUrl});
+    const { encrypted, iv, authTag } = encryptBuffer(req.file.buffer, req.DEK);
+
+    const fileUrl = await uploadToCloudinary(encrypted);
+
+    const isCreated = await createDocument(req.user.userId, {
+       ...req.body, fileUrl, originalName, mimeType,
+       iv: iv.toString('hex'),
+       authTag: authTag.toString('hex'),
+       isEncrypted: true
+   });
+
     res.status(201).json(
         new ApiResponse(
             201,
-            document,
+            isCreated,
             'Document created successfully'
         )
     );
