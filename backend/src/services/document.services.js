@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Document from '../models/document.model.js';
 import ApiError from '../utils/ApiError.js';
 
@@ -36,6 +37,14 @@ export const deleteDocument = async (documentId, userId) => {
         throw new ApiError(400, 'Missing document id');
     }
 
+    if (!mongoose.isValidObjectId(documentId)) {
+        throw new ApiError(400, 'Invalid document id');
+    }
+
+    if (!userId) {
+        throw new ApiError(401, 'Unauthorized');
+    }
+
     const result = await Document.updateOne(
         { _id: documentId, owner: userId, isDeleted: false },
         { isDeleted: true }
@@ -44,4 +53,27 @@ export const deleteDocument = async (documentId, userId) => {
     if (result.modifiedCount === 0) {
         throw new ApiError(404, 'Document not found');
     }
+};
+
+export const downloadDocument = async (documentId, userId) => {
+
+    if(!mongoose.isValidObjectId(documentId)) {
+        throw new ApiError(400, 'Invalid document id');
+    }
+
+    if (!userId) {
+        throw new ApiError(401, 'Unauthorized');
+    }
+
+    if (!documentId) {
+        throw new ApiError(400, 'Missing document id');
+    }
+
+    const document = await Document.findOne({ _id: documentId, owner: userId, isDeleted: false }).select('+iv +authTag');
+
+    if (!document) {
+        throw new ApiError(404, 'Document not found');
+    }
+
+    return document;
 };
