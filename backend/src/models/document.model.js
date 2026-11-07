@@ -29,6 +29,29 @@ const documentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    originalName: {
+        type: String,
+    },
+    mimeType: {
+        type: String,
+        required: true
+    },
+    iv: {
+        type: String,
+        select: false
+    },
+    authTag: {
+        type: String,
+        select: false
+    },
+    isEncrypted: {
+        type: Boolean,
+        default: false
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
