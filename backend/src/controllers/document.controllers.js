@@ -1,9 +1,9 @@
-import { createDocument, getDocuments, deleteDocument } from '../services/document.services.js';
+import { createDocument, getDocuments, deleteDocument, downloadDocument } from '../services/document.services.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import uploadToCloudinary from '../utils/uploadToCloudinary.js'
-import { encryptBuffer } from '../utils/crypto.js';
+import { encryptBuffer, decryptBuffer } from '../utils/crypto.js';
 
 export const create = asyncHandler(async (req, res) => {
     if (!req.file) {
@@ -52,4 +52,43 @@ export const del = asyncHandler(async (req, res) => {
             'Document deleted successfully'
         )
     );
+});
+
+export const download = asyncHandler(async (req, res) => {
+    const document = await downloadDocument(req.params.id, req.user.userId);
+
+    if (!document.isEncrypted) {
+        throw new ApiError(400, 'Document is not encrypted, cannot decrypt');
+    }
+
+    if (!req.DEK) {
+        throw new ApiError(403, 'Vault is locked');
+    }
+
+    if (!document.fileUrl) {
+        throw new ApiError(404, 'File URL not found for the document');
+    }
+
+    const fileRes = await fetch(document.fileUrl);
+
+    if (!fileRes.ok) {
+        throw new ApiError(502, 'Failed to fetch the document from cloud storage');
+    }
+
+    const encrypted = Buffer.from(await fileRes.arrayBuffer());
+
+    let decryptedBuffer;
+    try {
+        decryptedBuffer = decryptBuffer({
+            encrypted,
+            iv: Buffer.from(document.iv, 'hex'),
+            authTag: Buffer.from(document.authTag, 'hex')
+        }, req.DEK);
+    } catch (error) {
+        throw new ApiError(500, 'Failed to decrypt the document');
+    }
+
+    res.attachment(document.originalName);
+    res.setHeader('Content-Type', document.mimeType);
+    res.send(decryptedBuffer);
 });
