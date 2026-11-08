@@ -6,7 +6,7 @@ import DocumentList from '../components/DocumentList.jsx';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
-    const [documents, setDcouments] = useState([]);
+    const [documents, setDocuments] = useState([]);
     const [error, setError] = useState('');
     const [docError, setDocError] = useState('');
     const navigate = useNavigate();
@@ -14,30 +14,48 @@ function Dashboard() {
     const fetchDocuments = async() => {
         try {
             const res = await api.get('/documents/get');
-            setDcouments(res.data.data);
+            setDocuments(res.data.data);
         }
         catch (error) {
             setDocError(error.response?.data?.message || 'Unable to fetch documents');
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = async() => {
+        try {
+            await api.post('/vault/lock');
+        } catch (error) {
+        }
         localStorage.removeItem('token');
-        navigate('/login', {replace: true});
+        navigate('/login', { replace: true });
+    };
+
+    const handleLock = async() => {
+        try {
+            await api.post('/vault/lock');
+        } catch (error) {
+        }
+        navigate('/vault', { replace: true });
     };
 
     useEffect(() => {
-        const fetchUser = async() => {
+        const init = async() => {
             try {
+                const statusRes = await api.get('/vault/status');
+                if (!statusRes.data.data.isUnlocked) {
+                    navigate('/vault', { replace: true });
+                    return;
+                }
+
                 const res = await api.get('/auth/me');
-                setUser(res.data.data)
+                setUser(res.data.data);
+                await fetchDocuments();
             } catch (error) {
-                setError(error.response?.data?.message || 'Unable to fetch user details');
+                setError(error.response?.data?.message || 'Unable to load dashboard');
             }
         };
-        fetchUser();
-        fetchDocuments();
-    }, []);
+        init();
+    }, [navigate]);
 
     if(error) {
         return <p>{error}</p>
@@ -50,6 +68,7 @@ function Dashboard() {
         <>
             <h2>{user.name}</h2>
             <h2>{user.email}</h2>
+            <button onClick = {handleLock}>Lock Vault</button>{' '}
             <button onClick = {handleLogout}>Logout</button>
 
             <UploadForm onUploaded = {fetchDocuments} />
