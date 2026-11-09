@@ -52,6 +52,25 @@ const userSchema = new mongoose.Schema({
             default:false,
             select: false
         }
+    },
+    twoFactor: {
+        isEnabled: {
+            type: Boolean,
+            default: false,
+            select: false
+        },
+        secret: {
+            type: String,
+            select: false
+        },
+        pendingSecret: {
+            type: String,
+            select: false
+        },
+        backupCodes: {
+            type: [String],
+            select: false
+        }
     }
 }, {
         timestamps: true
