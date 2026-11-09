@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import { CATEGORIES } from '../constants/categories.js';
 
-function DocumentList({ documents, onDeleted }) {
+function DocumentList({ documents, onDeleted, onVaultLocked }) {
     const [filter, setFilter] = useState('all');
     const [error, setError] = useState('');
     const [openingId, setOpeningId] = useState(null);
-    const navigate = useNavigate();
 
     const handleDelete = async (id) => {
         const confirm = window.confirm('Delete this document?');
@@ -58,13 +56,12 @@ function DocumentList({ documents, onDeleted }) {
                 newTab.close();
             }
 
-            const message = await getBlobErrorMessage(err);
-
             if (err.response?.status === 403) {
-                navigate('/vault', { replace: true });
+                onVaultLocked();
                 return;
             }
 
+            const message = await getBlobErrorMessage(err);
             setError(message || 'Unable to open document');
         } finally {
             setOpeningId(null);
