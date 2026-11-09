@@ -2,6 +2,7 @@ import { generateSalt, deriveKEK, generateDEK, wrapKey, unwrapKey } from '../uti
 import { setDEK, clearDEK } from '../utils/vaultSession.js';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
+import { getDEK } from '../utils/vaultSession.js';
 
 export const setupVault = async(userId, vaultPassword) => {
     const user = await User.findById(userId).select('+vault.isSetup');
@@ -11,7 +12,7 @@ export const setupVault = async(userId, vaultPassword) => {
     }
 
     if(user.vault?.isSetup) {
-        throw new ApiError(402, 'Valut already setup');
+        throw new ApiError(409, 'Valut already setup');
     }
 
     const salt = generateSalt();
@@ -52,4 +53,16 @@ export const unlockVault = async(userId, vaultPassword) => {
 
 export const lockVault = (userId) => {
     clearDEK(userId);
+};
+
+export const getVaultStatus = async(userId) => {
+    const user = await User.findById(userId).select('+vault.isSetup');
+    if(!user) {
+        throw new ApiError(401, 'User not found');
+    }
+
+    return {
+        isSetup: user.vault?.isSetup || false,
+        isUnlocked: !!getDEK(userId)
+    };
 };
