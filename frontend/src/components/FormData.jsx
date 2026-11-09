@@ -2,7 +2,7 @@ import { useState } from 'react';
 import api from '../api/axios.js';
 import { CATEGORIES } from '../constants/categories.js';
 
-function uploadForm({ onUploaded }) {
+function UploadForm({ onUploaded, onVaultLocked }) {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(CATEGORIES[0]);
     const [notes, setNotes] = useState('');
@@ -18,6 +18,8 @@ function uploadForm({ onUploaded }) {
             setError('Please choose a file');
             return;
         }
+
+        const form = e.target;
 
         const formData = new FormData();
         if(title.trim()) {
@@ -35,10 +37,14 @@ function uploadForm({ onUploaded }) {
             setCategory(CATEGORIES[0]);
             setNotes('');
             setFile(null);
-            e.target.reset();
+            form.reset();
 
             onUploaded();
         } catch (error) {
+            if (error.response?.status === 403) {
+                onVaultLocked();
+                return;
+            }
             setError(error.response?.data?.message || 'Upload failed');
         } finally {
             setLoading(false);
@@ -81,4 +87,4 @@ function uploadForm({ onUploaded }) {
     );
 }
 
-export default uploadForm;
+export default UploadForm;
