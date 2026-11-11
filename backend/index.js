@@ -7,6 +7,7 @@ import connectDB from './db.js'
 import authRoutes from './src/routes/auth.routes.js';
 import documentRoutes from './src/routes/documents.routes.js'
 import vaultRoutes from './src/routes/vault.routes.js';
+import twoFactorRoutes from './src/routes/twofactor.routes.js';
 
 const app = express();
 app.use(cors())
@@ -16,6 +17,7 @@ app.use(passport.initialize());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/vault', vaultRoutes);
+app.use('/api/v1/2fa', twoFactorRoutes);
 
 app.use(errorHandler);
 
