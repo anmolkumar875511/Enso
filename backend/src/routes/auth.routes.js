@@ -1,7 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import verifyJWT from '../middlewares/auth.middleware.js'
-import { register, login, getMe, googleCallback } from '../controllers/auth.controlles.js';
+import { register, login, getMe, googleCallback } from '../controllers/auth.controller.js';
 
 const router = express.Router();
 

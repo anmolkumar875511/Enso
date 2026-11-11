@@ -1,6 +1,6 @@
 import express from 'express';
 import verifyJWT from '../middlewares/auth.middleware.js';
-import { create, get, del, download } from '../controllers/document.controllers.js';
+import { create, get, del, download } from '../controllers/document.controller.js';
 import upload from '../middlewares/multer.middleware.js';
 import requireUnlocked from '../middlewares/requireUnlocked.js';
 
