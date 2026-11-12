@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import UploadForm from '../components/FormData.jsx';
 import DocumentList from '../components/DocumentList.jsx';
+import TwoFactorSettings from '../components/TwoFactorSettings.jsx';
 import VaultSetup from '../components/VaultSetup.jsx';
 import VaultUnlock from '../components/VaultUnlock.jsx';
 
@@ -23,6 +24,15 @@ function Dashboard() {
         }
         catch (error) {
             setDocError(error.response?.data?.message || 'Unable to fetch documents');
+        }
+    };
+
+    const fetchUser = async() => {
+        try {
+            const res = await api.get('/auth/me');
+            setUser(res.data.data);
+        } catch (error) {
+            setError(error.response?.data?.message || 'Unable to fetch user details');
         }
     };
 
@@ -91,6 +101,8 @@ function Dashboard() {
             <h2>{user.name}</h2>
             <h2>{user.email}</h2>
             <button onClick = {handleLogout}>Logout</button>
+
+            <TwoFactorSettings enabled = {user.twoFactorEnabled} onChanged = {fetchUser} />
 
             {vaultState === 'setup' && (
                 <VaultSetup onDone = {handleVaultReady} />
