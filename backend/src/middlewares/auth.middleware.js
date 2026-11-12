@@ -15,10 +15,10 @@ const verifyJWT = asyncHandler(async(req, res, next) => {
     try {
         decode = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-        throw new ApiError(401, 'Invalid or expired token')
+        throw new ApiError(401, 'Invalid or expired token');
     }
-
-    if(decode.purpose) {
+    
+    if (decode.purpose) {
         throw new ApiError(401, 'Invalid or expired token');
     }
 
