@@ -3,7 +3,7 @@ import ApiError from './ApiError.js';
 
 const getKey = () => {
     const key = process.env.TOTP_ENC_KEY;
-    if(!key || !key.length !== 64) {
+    if(!key || key.length !== 64) {
         throw new ApiError(500, 'TOTP_ENC_KEY is missing or invalid.')
     }
     return Buffer.from(key, 'hex');
@@ -11,7 +11,7 @@ const getKey = () => {
 
 export const encryptSecret = (text) => {
     const { encrypted, iv, authTag } = encryptBuffer(Buffer.from(text, 'utf8'), getKey());
-    return [iv, authTag, encrypted].map((m) => m.toString('hex').join(':'));
+    return [iv, authTag, encrypted].map((m) => m.toString('hex')).join(':');
 };
 
 export const decryptSecret = (stored) => {
