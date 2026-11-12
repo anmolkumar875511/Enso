@@ -11,13 +11,19 @@ const verifyJWT = asyncHandler(async(req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
+    let decode;
     try {
-        const decode = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decode;
-        next();
+        decode = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         throw new ApiError(401, 'Invalid or expired token')
     }
+
+    if(decode.purpose) {
+        throw new ApiError(401, 'Invalid or expired token');
+    }
+
+    req.user = decode;
+    next();
 });
 
 export default verifyJWT;
