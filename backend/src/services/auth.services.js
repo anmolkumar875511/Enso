@@ -15,7 +15,7 @@ const signTempToken = (userId) => {
     return jwt.sign(
         {userId, purpose: '2fa'},
         process.env.JWT_SECRET,
-        {expiresIn: '5m'}
+        {expiresIn: process.env.TOTP_EXPIRES_IN}
     );
 };
 
