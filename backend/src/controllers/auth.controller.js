@@ -1,5 +1,5 @@
 import passport from 'passport';
-import { registerUser, loginUser, completeTwoFactorLogin, getUser, signToken } from '../services/auth.services.js';
+import { registerUser, loginUser, getUser, getLoginResult, completeTwoFactorLogin } from '../services/auth.services.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -38,14 +38,24 @@ export const verifyTwoFactorLogin = asyncHandler(async(req, res) => {
 });
 
 export const googleCallback = (req, res, next) => {
-    passport.authenticate('google', {session: false}, (err, user, info) => {
+    passport.authenticate('google', {session: false}, async(err, user, info) => {
         if(err || !user) {
             const message = encodeURIComponent(info?.message || 'Google sign-in failed');
             return res.redirect(`${process.env.CLIENT_URL}/login?error=${message}`);
         }
 
-        const token = signToken(user._id);
-        return res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${token}`);
+        try {
+            const result = await getLoginResult(user._id);
+
+            if(result.requires2FA) {
+                return res.redirect(`${process.env.CLIENT_URL}/login?tempToken=${result.tempToken}`);
+            }
+
+            return res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${result.token}`);
+        } catch (error) {
+            const message = encodeURIComponent('Google sign-in failed');
+            return res.redirect(`${process.env.CLIENT_URL}/login?error=${message}`);
+        }
     })(req, res, next);
 };
 
