@@ -1,5 +1,5 @@
 import passport from 'passport';
-import { registerUser, loginUser, getUser, signToken } from '../services/auth.services.js';
+import { registerUser, loginUser, completeTwoFactorLogin, getUser, signToken } from '../services/auth.services.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -20,6 +20,18 @@ export const login = asyncHandler(async(req, res) => {
         new ApiResponse(
             200,
             result,
+            result.requires2FA ? 'Two-factor code required' : 'Login successfully'
+        )
+    );
+});
+
+export const twoFactorLogin = asyncHandler(async(req, res) => {
+    const { tempToken, code } = req.body || {};
+    const token = await completeTwoFactorLogin(tempToken, code);
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            { token },
             'Login successfully'
         )
     );
