@@ -10,6 +10,24 @@ export const signToken = (userId) => {
     );
 };
 
+const signTempToken = (userId) => {
+    return jwt.sign(
+        {userId, purpose: '2fa'},
+        process.env.JWT_SECRET,
+        {expiresIn: process.env.EXPIRES_IN}
+    );
+};
+
+const getLoginResult = async(userId) => {
+    const user = await User.findById(userId).select('+twoFactor.isEnabled');
+
+    if(user?.twoFactor?.isEnabled) {
+        return { requires2FA: true, tempToken: signTempToken(userId) }
+    }
+
+    return { token: signToken(userId) }
+};
+
 export const registerUser = async({name, email, password}) => {
     if(!(name && email && password)) {
         throw new ApiError(400, 'Name, Email and Password all are required to register');
@@ -79,6 +97,7 @@ export const getUser = async(userId) => {
 
     return {
         'name': user.name,
-        'email': user.email
+        'email': user.email,
+        'twoFactorEnabled': Boolean(user.twoFactor?.isEnabled)
     };
 };
