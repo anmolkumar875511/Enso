@@ -1,5 +1,5 @@
 import express from 'express';
-import verifyJWT from "../middlewares/auth.middleware";
+import verifyJWT from "../middlewares/auth.middleware.js";
 import { twoFactorLimiter } from '../middlewares/rateLimiter.js';
 import { setup, enable, disable } from '../controllers/twofactor.controller.js';
 

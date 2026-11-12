@@ -15,7 +15,7 @@ const isValidTotp = (code, secret) => /^\d{6}$/.test(code) && authenticator.chec
 
 const generateBackupCode = () => Array.from({length: 8}, () => crypto.randomBytes(5).toString('hex'));
 
-export const beginSetup = async (userId) => {
+export const startSetup = async (userId) => {
     const user = await User.findById(userId).select('+twoFactor.isEnabled');
 
     if(!user) {
