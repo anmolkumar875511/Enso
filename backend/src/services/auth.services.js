@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
+import { verifyUserCode } from './twofactor.services.js';
 
 export const signToken = (userId) => {
     return jwt.sign(
@@ -59,7 +60,31 @@ export const loginUser = async({email, password}) => {
         throw new ApiError(401, 'Invalid password, Please use valid password');
     }
 
-    return signToken(user._id);
+    return getLoginResult(user._id);
+};
+
+export const completeTwoFactorLogin = async(tempToken, code) => {
+    if(!tempToken || !code) {
+        throw new ApiError(400, 'Token and code are required');
+    }
+
+    let decoded;
+    try {
+        decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+    } catch (error) {
+        throw new ApiError(401, 'Two-factor session expired, please login again');
+    }
+
+    if(decoded.purpose !== '2fa') {
+        throw new ApiError(401, 'Invalid token');
+    }
+
+    const isValid = await verifyUserCode(decoded.userId, code);
+    if(!isValid) {
+        throw new ApiError(401, 'Invalid authentication code');
+    }
+
+    return signToken(decoded.userId);
 };
 
 export const findOrCreateGoogleUser = async({googleId, email, name, emailVerified}) => {
