@@ -15,18 +15,18 @@ const signTempToken = (userId) => {
     return jwt.sign(
         {userId, purpose: '2fa'},
         process.env.JWT_SECRET,
-        {expiresIn: process.env.EXPIRES_IN}
+        {expiresIn: '5m'}
     );
 };
 
-const getLoginResult = async(userId) => {
+export const getLoginResult = async(userId) => {
     const user = await User.findById(userId).select('+twoFactor.isEnabled');
 
     if(user?.twoFactor?.isEnabled) {
-        return { requires2FA: true, tempToken: signTempToken(userId) }
+        return { requires2FA: true, tempToken: signTempToken(userId) };
     }
 
-    return { token: signToken(userId) }
+    return { token: signToken(userId) };
 };
 
 export const registerUser = async({name, email, password}) => {
@@ -45,8 +45,12 @@ export const registerUser = async({name, email, password}) => {
 };
 
 export const loginUser = async({email, password}) => {
-    const user = await User.findOne({email: email}).select('+passwordHash');
-    
+    if(!(email && password)) {
+        throw new ApiError(400, 'Email and Password are required');
+    }
+
+    const user = await User.findOne({email: email.toLowerCase()}).select('+passwordHash');
+
     if(!user) {
         throw new ApiError(401, 'Invalid email, Please use valid email')
     }
@@ -72,7 +76,7 @@ export const completeTwoFactorLogin = async(tempToken, code) => {
     try {
         decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
     } catch (error) {
-        throw new ApiError(401, 'Two-factor session expired, please login again');
+        throw new ApiError(401, 'Two-factor session expired, please log in again');
     }
 
     if(decoded.purpose !== '2fa') {
@@ -112,9 +116,8 @@ export const findOrCreateGoogleUser = async({googleId, email, name, emailVerifie
     });
 };
 
-
 export const getUser = async(userId) => {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('+twoFactor.isEnabled');
 
     if(!user) {
         throw new ApiError(404, 'User not found');
