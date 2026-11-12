@@ -15,7 +15,7 @@ export const enable = asyncHandler(async(req, res) => {
     }
 
     const backupCodes = await confirmSetup(req.user.userId, code);
-    res.status(200).json(new ApiResponse(200, backupCodes, {backupCodes}, 'Two factor authentication enabled'));
+    res.status(200).json(new ApiResponse(200, { backupCodes }, 'Two factor authentication enabled'));
 });
 
 export const disable = asyncHandler(async(req, res) => {
