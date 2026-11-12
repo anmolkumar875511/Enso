@@ -25,7 +25,7 @@ export const login = asyncHandler(async(req, res) => {
     );
 });
 
-export const twoFactorLogin = asyncHandler(async(req, res) => {
+export const verifyTwoFactorLogin = asyncHandler(async(req, res) => {
     const { tempToken, code } = req.body || {};
     const token = await completeTwoFactorLogin(tempToken, code);
     res.status(200).json(
