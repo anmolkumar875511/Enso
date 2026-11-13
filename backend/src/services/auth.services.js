@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import { verifyUserCode } from './twofactor.services.js';
+import { logEvent } from './auditLog.services.js';
 
 export const signToken = (userId) => {
     return jwt.sign(
@@ -44,7 +45,7 @@ export const registerUser = async({name, email, password}) => {
     return signToken(user._id);
 };
 
-export const loginUser = async({email, password}) => {
+export const loginUser = async({email, password}, ctx = {}) => {
     if(!(email && password)) {
         throw new ApiError(400, 'Email and Password are required');
     }
@@ -61,13 +62,20 @@ export const loginUser = async({email, password}) => {
 
     const isMatching = await user.comparePassword(password);
     if(!isMatching) {
+        await logEvent({ userId: user._id, action: 'login_failed', success: false, ctx });
         throw new ApiError(401, 'Invalid password, Please use valid password');
     }
 
-    return getLoginResult(user._id);
+    const result = await getLoginResult(user._id);
+
+    if(!result.requires2FA) {
+        await logEvent({ userId: user._id, action: 'login', ctx });
+    }
+
+    return result;
 };
 
-export const completeTwoFactorLogin = async(tempToken, code) => {
+export const completeTwoFactorLogin = async(tempToken, code, ctx = {}) => {
     if(!tempToken || !code) {
         throw new ApiError(400, 'Token and code are required');
     }
@@ -85,8 +93,11 @@ export const completeTwoFactorLogin = async(tempToken, code) => {
 
     const isValid = await verifyUserCode(decoded.userId, code);
     if(!isValid) {
+        await logEvent({ userId: decoded.userId, action: 'login_2fa_failed', success: false, ctx });
         throw new ApiError(401, 'Invalid authentication code');
     }
+
+    await logEvent({ userId: decoded.userId, action: 'login', ctx });
 
     return signToken(decoded.userId);
 };

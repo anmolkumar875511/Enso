@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { registerUser, loginUser, getUser, getLoginResult, completeTwoFactorLogin } from '../services/auth.services.js';
+import { getRequestContext, logEvent } from '../services/audit.services.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -15,7 +16,7 @@ export const register = asyncHandler(async(req, res) => {
 });
 
 export const login = asyncHandler(async(req, res) => {
-    const result = await loginUser(req.body);
+    const result = await loginUser(req.body, getRequestContext(req));
     res.status(200).json(
         new ApiResponse(
             200,
@@ -27,7 +28,7 @@ export const login = asyncHandler(async(req, res) => {
 
 export const verifyTwoFactorLogin = asyncHandler(async(req, res) => {
     const { tempToken, code } = req.body || {};
-    const token = await completeTwoFactorLogin(tempToken, code);
+    const token = await completeTwoFactorLogin(tempToken, code, getRequestContext(req));
     res.status(200).json(
         new ApiResponse(
             200,
@@ -50,6 +51,8 @@ export const googleCallback = (req, res, next) => {
             if(result.requires2FA) {
                 return res.redirect(`${process.env.CLIENT_URL}/login?tempToken=${result.tempToken}`);
             }
+
+            await logEvent({ userId: user._id, action: 'login', ctx: getRequestContext(req) });
 
             return res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${result.token}`);
         } catch (error) {

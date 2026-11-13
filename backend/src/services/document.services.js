@@ -11,7 +11,7 @@ export const createDocument = async (userId, { title, category, notes, fileUrl, 
         throw new ApiError(400, 'Bad request, all fields are required');
     }
 
-    await Document.create({
+    const document = await Document.create({
         title,
         category,
         fileUrl,
@@ -24,7 +24,7 @@ export const createDocument = async (userId, { title, category, notes, fileUrl, 
         isEncrypted
     });
 
-    return true;
+    return document;
 };
 
 export const getDocuments = async (userId) => {
@@ -45,14 +45,15 @@ export const deleteDocument = async (documentId, userId) => {
         throw new ApiError(401, 'Unauthorized');
     }
 
-    const result = await Document.updateOne(
+    const document = await Document.updateOne(
         { _id: documentId, owner: userId, isDeleted: false },
         { isDeleted: true }
     );
 
-    if (result.modifiedCount === 0) {
+    if (document.modifiedCount === 0) {
         throw new ApiError(404, 'Document not found');
     }
+    return document
 };
 
 export const downloadDocument = async (documentId, userId) => {

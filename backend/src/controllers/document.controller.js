@@ -1,4 +1,5 @@
 import { createDocument, getDocuments, deleteDocument, downloadDocument } from '../services/document.services.js';
+import { getRequestContext, logEvent } from '../services/auditLog.services.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
@@ -16,17 +17,25 @@ export const create = asyncHandler(async (req, res) => {
 
     const fileUrl = await uploadToCloudinary(encrypted);
 
-    const isCreated = await createDocument(req.user.userId, {
+    const document = await createDocument(req.user.userId, {
        ...req.body, fileUrl, originalName, mimeType,
        iv: iv.toString('hex'),
        authTag: authTag.toString('hex'),
        isEncrypted: true
    });
 
+    await logEvent({
+        user: req.user.userID,
+        document: document._id,
+        action: 'document_created',
+        resourceName: document.originalName,
+        ctx: getRequestContext(req)
+    });
+
     res.status(201).json(
         new ApiResponse(
             201,
-            isCreated,
+            { 'title': document.title, 'name': document.originalName },
             'Document created successfully'
         )
     );
@@ -44,7 +53,16 @@ export const get = asyncHandler(async (req, res) => {
 });
 
 export const del = asyncHandler(async (req, res) => {
-    await deleteDocument(req.body.id, req.user.userId);
+    const document = await deleteDocument(req.body.id, req.user.userId);
+
+    await logEvent({
+        user: req.user.userId,
+        document: document._id,
+        action: 'document_delete',
+        resourceName: document.originalName,
+        ctx: getRequestContext(req)
+    });
+
     res.status(200).json(
         new ApiResponse(
             200,
@@ -87,6 +105,14 @@ export const download = asyncHandler(async (req, res) => {
     } catch (error) {
         throw new ApiError(500, 'Failed to decrypt the document');
     }
+
+    await logEvent({
+        user: req.user.userId,
+        document: document._id,
+        action: 'document_download',
+        resouceName: document.originalName,
+        ctx: getRequestContext
+    });
 
     res.attachment(document.originalName);
     res.setHeader('Content-Type', document.mimeType);

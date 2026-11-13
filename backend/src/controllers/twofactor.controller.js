@@ -1,4 +1,5 @@
 import { startSetup, confirmSetup, disableTwoFactor } from '../services/twofactor.services.js';
+import { getRequestContext, logEvent } from '../services/auditLog.services.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -15,6 +16,8 @@ export const enable = asyncHandler(async(req, res) => {
     }
 
     const backupCodes = await confirmSetup(req.user.userId, code);
+    await logEvent({user: req.user.userId, action: 'twofactor_enabled', ctx: getRequestContext(req)});
+
     res.status(200).json(new ApiResponse(200, { backupCodes }, 'Two factor authentication enabled'));
 });
 
@@ -25,5 +28,7 @@ export const disable = asyncHandler(async(req, res) => {
     }
 
     await disableTwoFactor(req.user.userId, code);
+    await logEvent({user: userId, action: 'twofactor_disabled', ctx: getRequestContext(req)});
+    
     res.status(200).json(new ApiResponse(200, null, 'Two factor authentication disabled'));
 });
