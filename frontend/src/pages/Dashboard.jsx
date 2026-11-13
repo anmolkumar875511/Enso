@@ -4,6 +4,7 @@ import api from '../api/axios.js';
 import UploadForm from '../components/FormData.jsx';
 import DocumentList from '../components/DocumentList.jsx';
 import TwoFactorSettings from '../components/TwoFactorSettings.jsx';
+import AuditLog from '../components/AuditLog.jsx';
 import VaultSetup from '../components/VaultSetup.jsx';
 import VaultUnlock from '../components/VaultUnlock.jsx';
 
@@ -104,6 +105,8 @@ function Dashboard() {
 
             <TwoFactorSettings enabled = {user.twoFactorEnabled} onChanged = {fetchUser} />
 
+            <AuditLog/>
+            
             {vaultState === 'setup' && (
                 <VaultSetup onDone = {handleVaultReady} />
             )}
